@@ -1,6 +1,13 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <script src="Deco_Menu::js/menu.js" /> 
+        <script src="Deco_Menu::js/menu_mobile.js" /> 
+    </head>
     <body>
+        <referenceBlock class="Magento\Framework\View\Element\Template" name="store.menu" group="navigation-sections" template="Magento_Theme::html/container.phtml">
+            <block class="Deco\Menu\Block\Menu" name="deco_menu_mobile" template="Deco_Menu::menu_mobile.phtml" after="-"/>
+        </referenceBlock>
         <referenceContainer name="header.container">
             <block class="Deco\Menu\Block\Menu" name="deco_menu" template="Deco_Menu::menu.phtml" after="-"/>
         </referenceContainer>
