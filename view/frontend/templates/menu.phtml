@@ -1,117 +1,54 @@
-<?php
-$categories = $block->getActiveCategoryCollection();
-$level1 = 0;
-$level2 = 0;
-$level3 = 0;
-$contador = 0;
+<?php 
+$categories = $block->getActiveCategoryCollection()->setOrder('name','ASC');;
+
+$html = "<ul class='level-0' >";
 foreach($categories as $category){
-    if($category->getLevel() == 2){
-        $level1 += 1;
-        $level2 = 0;
-        $level3 = 0;
-        $arrayCategoryLevel[$level1][$level2][$level3] = $category->getLevel();
-        $arrayCategoryName[$level1][$level2][$level3] = $category->getName();
-        $arrayCategoryUrl[$level1][$level2][$level3] = $category->getUrl();
-        $arrayCategoryNameParent[$level1][$level2][$level3] = $category->getParentCategory()->getName();
+    if(empty($category->getChildren()) && $category->getLevel() == 2){
+        $html .= "<ul>";
+            $html .= "<li>";
+                $html .= "<a href='".$category->getUrl()."' >";
+                    $html .= "<span>";
+                        $html .= $category->getName();
+                    $html .= "</span>";
+                $html .= "</a>";
+            $html .= "</li>";
+        $html .= "</ul>";
+    }elseif(!empty($category->getChildren()) && $category->getLevel() == 2){
+        $level = $category->getLevel();
+        $html .= childrenList($category, $categories, $level);
     }
-    if($category->getLevel() == 3){
-        $level2 += 1;
-        $level3 = 0;
-        $arrayCategoryLevel[$level1][$level2][$level3] = $category->getLevel();
-        $arrayCategoryName[$level1][$level2][$level3] = $category->getName();
-        $arrayCategoryUrl[$level1][$level2][$level3] = $category->getUrl();
-        $arrayCategoryNameParent[$level1][$level2][$level3] = $category->getParentCategory()->getName();
-    }
-    if($category->getLevel() == 4){
-        $level3 += 1;
-        $arrayCategoryLevel[$level1][$level2][$level3] = $category->getLevel();
-        $arrayCategoryName[$level1][$level2][$level3] = $category->getName();
-        $arrayCategoryUrl[$level1][$level2][$level3] = $category->getUrl();
-        $arrayCategoryNameParent[$level1][$level2][$level3] = $category->getParentCategory()->getName();
-    }
-    $contador += 1;
 }
+$html .= "</ul>";
 
-$array = []; 
-$arrayLevel1 = [];
-$arrayLevel2 = [];
-$arrayLevel3 = [];
-for($x = 0;$x <= $contador; $x++){
-    for($y = 0;$y <= $contador; $y++){
-        for($z = 0;$z <= $contador; $z++){
-            if(!empty($arrayCategoryName[$x][$y][$z])){
-                if($y == 0 && $z == 0){
-                    if($arrayLevel3 != []){
-                        array_push($arrayLevel2, $arrayLevel3);
-                        $arrayLevel3 = [];
-                    }
-                    if($arrayLevel2 != []){
-                        array_push($arrayLevel1, $arrayLevel2);
-                        $arrayLevel2 = [];
-                    }
-                    if($arrayLevel1 != []){
-                        array_push($array, $arrayLevel1);
-                        $arrayLevel1 = [];
-                    }
-                    array_push($arrayLevel1, $arrayCategoryName[$x][$y][$z]);
-                }
-
-                if($y != 0 && $z == 0){
-                    if($arrayLevel3 != []){
-                        array_push($arrayLevel2, $arrayLevel3);
-                        $arrayLevel3 = [];
-                    }
-                    if($arrayLevel2 != []){
-                        array_push($arrayLevel1, $arrayLevel2);
-                        $arrayLevel2 = [];
-                    }
-                    array_push($arrayLevel2, $arrayCategoryName[$x][$y][$z]);
-                }
-
-                if($z != 0){
-                    array_push($arrayLevel3, $arrayCategoryName[$x][$y][$z]);
+function childrenList($category, $categories, $level){
+    $level++;
+    $html = "<ul class='group-hover'>";
+        $html .= "<li>";
+            $html .= "<a class='has-child' href='".$category->getUrl()."' >";
+                $html .= "<span>";
+                    $html .= $category->getName();
+                $html .= "</span>";
+            $html .= "</a>";
+        $html .= "</li>";
+        $html .= "<ul class='group'>";
+            foreach($categories as $categoryLevel){
+                if(empty($categoryLevel->getChildren()) && $categoryLevel->getLevel() == $level && $categoryLevel->getParentId() == $category->getId()){
+                    $html .= "<ul>";
+                        $html .= "<li>";
+                            $html .= "<a href='".$categoryLevel->getUrl()."' >";
+                                $html .= "<span>";
+                                    $html .= $categoryLevel->getName();
+                                $html .= "</span>";
+                            $html .= "</a>";    
+                        $html .= "</li>";
+                    $html .= "</ul>";
+                }elseif(!empty($categoryLevel->getChildren()) && $categoryLevel->getLevel() == $level && $categoryLevel->getParentId() == $category->getId()){
+                    $html .= childrenList($categoryLevel, $categories, $level);
                 }
             }
-        }
-    }
-}
-
-if($arrayLevel3 != []){
-    array_push($arrayLevel2, $arrayLevel3);
-    $arrayLevel3 = [];
-}
-if($arrayLevel2 != []){
-    array_push($arrayLevel1, $arrayLevel2);
-    $arrayLevel2 = [];
-}
-if($arrayLevel1 != []){
-    array_push($array, $arrayLevel1);
-    $arrayLevel1 = [];
-}
-
-function arrayParaLista($array, $nivel = 0) {
-    $numItems = count($array);
-    $i = 1;
-    $html = "<ul class='level-$nivel' >";
-    foreach ($array as $key => $value) {
-        // Se o valor é um array, chama a função recursivamente
-        if (is_array($value)) {
-            if($nivel == 1 && $key == 1){
-                $html .= "<ul class='group-level-$nivel' >";
-            }
-            $html .= arrayParaLista($value, $nivel + 1);
-            if($nivel == 1 && $i == $numItems) {
-                $html .= "</ul>";
-            }
-        } else {
-            // Se não é um array, é um valor simples, então exibimos ele
-            $html .= "<li><a><span>";
-            $html .= $value;
-            $html .= "</span></a></li>";
-        }
-        $i++;
-    }
+        $html .= "</ul>";
     $html .= "</ul>";
+
     return $html;
 }
 ?>
@@ -123,7 +60,7 @@ function arrayParaLista($array, $nivel = 0) {
                 Categorias
             </div>
             <div>
-                <?= arrayParaLista($array) ?>
+                <?= $html ?>
             </div>
         </div>
     </div>
@@ -135,51 +72,34 @@ require([
     'domReady!'
 ], function ($) {
     var level0;
-    var level1;
-    var level2;
-    var level3;
-    var groupLevel1;
-    var decoMenu;
-    var a;
+    var group;
+    var qtdUlMax;
     var height;
+    var liHeight = 28;
 
-    level1 = document.querySelectorAll(".deco-menu .level-1");
-    for(i=0;i<level1.length;i++){
-        if(level1[i].children.length > 1 ){
-            a = level1[i].children[0].children[0];
-            a.classList.add("has-child");
+    level0Ul = document.querySelectorAll(".deco-menu .level-0 > ul");
+    group = document.querySelectorAll(".deco-menu .level-0 .group");
+    li = document.querySelectorAll(".deco-menu li");
+
+    qtdUlMax = level0Ul.length;
+
+    for(i=0;i<group.length;i++){
+        if(group[i].children.length > qtdUlMax){
+            qtdUlMax = group[i].children.length;
         }
     }
 
-    level2 = document.querySelectorAll(".deco-menu .level-2");
-    for(i=0;i<level2.length;i++){
-        if(level2[i].children.length > 1 ){
-            a = level2[i].children[0].children[0];
-            a.classList.add("has-child");
-        }
+    for(i=0;i<li.length;i++){
+        li[i].style.height = liHeight + "px";
     }
 
-    level0 = document.querySelectorAll(".deco-menu div div .level-0");
-    groupLevel1 = document.querySelectorAll(".deco-menu div div .level-0 .level-1 .group-level-1");
-    level3 = document.querySelectorAll(".deco-menu div div .level-0 .level-1 .group-level-1 .level-2 .level-3");
+    height = (liHeight * qtdUlMax);
 
-    height = level0[0].offsetHeight;
+    level0 = document.querySelectorAll(".deco-menu .level-0");
+    level0[0].style.height = height + "px";
 
-    for(i=0;i<groupLevel1.length;i++){
-        if(groupLevel1[i].offsetHeight > height){
-            height = groupLevel1[i].offsetHeight;
-        }
+    for(i=0;i<group.length;i++){
+        group[i].style.height = height + "px";
     }
-
-    for(i=0;i<level3.length;i++){
-        if(level3[i].offsetHeight > height){
-            height = level3[i].offsetHeight;
-        }
-    }
-
-    height += 1;
-
-    console.log(height);
-    
 });
 </script>

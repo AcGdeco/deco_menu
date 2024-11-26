@@ -1,0 +1,212 @@
+<?php
+$categories = $block->getActiveCategoryCollection();
+
+$level1 = 0;
+$level2 = 0;
+$level3 = 0;
+$contador = 0;
+foreach($categories as $category){
+    $parenteCategoryId = $category->getparent_id();
+    if(empty($arrayChildrensCategory[$parenteCategoryId])){
+        $arrayChildrensCategory[$parenteCategoryId] = [];
+    }
+    array_push($arrayChildrensCategory[$parenteCategoryId], $category->getId());
+
+    if($category->getLevel() == 2){
+        $level1 += 1;
+        $level2 = 0;
+        $level3 = 0;
+        $arrayCategoryLevel[$level1][$level2][$level3] = $category->getLevel();
+        $arrayCategoryName[$level1][$level2][$level3] = $category->getName();
+        $arrayCategoryUrl[$level1][$level2][$level3] = $category->getUrl();
+        $arrayCategoryNameParent[$level1][$level2][$level3] = $category->getParentCategory()->getId();
+    }
+
+    if($category->getLevel() == 3){
+        $level2 += 1;
+        $level3 = 0;
+        $arrayCategoryLevel[$level1][$level2][$level3] = $category->getLevel();
+        $arrayCategoryName[$level1][$level2][$level3] = $category->getName();
+        $arrayCategoryUrl[$level1][$level2][$level3] = $category->getUrl();
+        $arrayCategoryNameParent[$level1][$level2][$level3] = $category->getParentCategory()->getId();
+    }
+
+    if($category->getLevel() == 4){
+        $level3 += 1;
+        $arrayCategoryLevel[$level1][$level2][$level3] = $category->getLevel();
+        $arrayCategoryName[$level1][$level2][$level3] = $category->getName();
+        $arrayCategoryUrl[$level1][$level2][$level3] = $category->getUrl();
+        $arrayCategoryNameParent[$level1][$level2][$level3] = $category->getParentCategory()->getId();
+    }
+
+    $contador += 1;
+}
+
+$array = []; 
+$arrayLevel1 = [];
+$arrayLevel2 = [];
+$arrayLevel3 = [];
+for($x = 0;$x <= $contador; $x++){
+    for($y = 0;$y <= $contador; $y++){
+        for($z = 0;$z <= $contador; $z++){
+            if(!empty($arrayCategoryName[$x][$y][$z])){
+                if($y == 0 && $z == 0){
+                    if($arrayLevel3 != []){
+                        array_push($arrayLevel2, $arrayLevel3);
+                        $arrayLevel3 = [];
+                    }
+                    if($arrayLevel2 != []){
+                        array_push($arrayLevel1, $arrayLevel2);
+                        $arrayLevel2 = [];
+                    }
+                    if($arrayLevel1 != []){
+                        array_push($array, $arrayLevel1);
+                        $arrayLevel1 = [];
+                    }
+                    array_push($arrayLevel1, $arrayCategoryName[$x][$y][$z]);
+                }
+
+                if($y != 0 && $z == 0){
+                    if($arrayLevel3 != []){
+                        array_push($arrayLevel2, $arrayLevel3);
+                        $arrayLevel3 = [];
+                    }
+                    if($arrayLevel2 != []){
+                        array_push($arrayLevel1, $arrayLevel2);
+                        $arrayLevel2 = [];
+                    }
+                    array_push($arrayLevel2, $arrayCategoryName[$x][$y][$z]);
+                }
+
+                if($z != 0){
+                    array_push($arrayLevel3, $arrayCategoryName[$x][$y][$z]);
+                }
+            }
+        }
+    }
+}
+
+if($arrayLevel3 != []){
+    array_push($arrayLevel2, $arrayLevel3);
+    $arrayLevel3 = [];
+}
+if($arrayLevel2 != []){
+    array_push($arrayLevel1, $arrayLevel2);
+    $arrayLevel2 = [];
+}
+if($arrayLevel1 != []){
+    array_push($array, $arrayLevel1);
+    $arrayLevel1 = [];
+}
+
+function arrayParaLista($array, $nivel = 0) {
+    $numItems = count($array);
+    $i = 1;
+    $html = "<ul class='level-$nivel' >";
+    foreach ($array as $key => $value) {
+        // Se o valor é um array, chama a função recursivamente
+        if (is_array($value)) {
+            if($nivel == 1 && $key == 1){
+                $html .= "<ul class='group-level-$nivel' >";
+            }
+            $html .= arrayParaLista($value, $nivel + 1);
+            if($nivel == 1 && $i == $numItems) {
+                $html .= "</ul>";
+            }
+        } else {
+            // Se não é um array, é um valor simples, então exibimos ele
+            $html .= "<li><a><span>";
+            $html .= $value;
+            $html .= "</span></a></li>";
+        }
+        $i++;
+    }
+    $html .= "</ul>";
+    return $html;
+}
+?>
+
+<div class="deco-menu-wrapper">
+    <div class="deco-menu">
+        <div>
+            <div class="btn-menu" >
+                Categorias
+            </div>
+            <div>
+                <?= arrayParaLista($array) ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+require([
+    'jquery',
+    'domReady!'
+], function ($) {
+    var level0;
+    var level1;
+    var level2;
+    var level3;
+    var groupLevel1;
+    var decoMenu;
+    var a;
+    var height;
+
+    level1 = document.querySelectorAll(".deco-menu .level-1");
+    for(i=0;i<level1.length;i++){
+        if(level1[i].children.length > 1 ){
+            a = level1[i].children[0].children[0];
+            a.classList.add("has-child");
+        }
+    }
+
+    level2 = document.querySelectorAll(".deco-menu .level-2");
+    for(i=0;i<level2.length;i++){
+        if(level2[i].children.length > 1 ){
+            a = level2[i].children[0].children[0];
+            a.classList.add("has-child");
+        }
+    }
+
+    level0 = document.querySelectorAll(".deco-menu div div .level-0");
+    groupLevel1 = document.querySelectorAll(".deco-menu div div .level-0 .level-1 .group-level-1");
+    level3 = document.querySelectorAll(".deco-menu div div .level-0 .level-1 .group-level-1 .level-2 .level-3");
+
+    height = level0[0].offsetHeight;
+
+    for(i=0;i<groupLevel1.length;i++){
+        if(groupLevel1[i].offsetHeight > height){
+            height = groupLevel1[i].offsetHeight;
+        }
+    }
+
+    for(i=0;i<level3.length;i++){
+        if(level3[i].offsetHeight > height){
+            height = level3[i].offsetHeight;
+        }
+    }
+
+    height += 1;
+
+    console.log(height);
+    
+});
+</script>
+
+<?php
+$categoryId = 2;
+$_objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$catChildrensIds = $_objectManager->create('Magento\Catalog\Model\Category')->load($categoryId)->getChildren();
+?>
+<ul>
+<?php 
+foreach($categories as $category){
+    foreach($categories as $cat){
+        if(!empty($category->getChildren())){
+            echo $category->getId()." | ".$category->getChildren()."<br>";
+        }
+    }
+}
+?>
+</ul>
