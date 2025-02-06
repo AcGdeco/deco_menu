@@ -23,11 +23,12 @@ require([
     for(i=0;i<li.length;i++){
         li[i].style.height = liHeight + "px";
     }
-
     height = (liHeight * qtdUlMax);
 
     level0 = document.querySelectorAll(".deco-menu .level-0");
-    level0[0].style.height = height + "px";
+    if(level0.length > 0){
+        level0[0].style.height = height + "px";
+    }
 
     for(i=0;i<group.length;i++){
         group[i].style.height = height + "px";
