@@ -1,3 +1,11 @@
 <div class="deco-menu-mobile" >
     <?= $block->getListTypeCategoryCollection() ?>
 </div>
+
+<script type="text/javascript">
+    require([
+        'deco_menu_mobile'
+    ], function (decoMenuMobile) {
+        decoMenuMobile.mobile();
+    });
+</script>
