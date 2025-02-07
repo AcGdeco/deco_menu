@@ -12,6 +12,7 @@ define([
             var liHeight = 28;
             var level0Ul;
             var li;
+            var i;
 
             level0Ul = document.querySelectorAll(".deco-menu .level-0 > ul");
             group = document.querySelectorAll(".deco-menu .level-0 .group");

@@ -7,6 +7,7 @@ define([
         mobile: function () {
             var frontName;
             var displayGroup;
+            var i;
 
             frontName = document.querySelectorAll(".deco-menu-mobile li.has-child .front-name-outside");
             for(i = 0;i < frontName.length;i++) {
