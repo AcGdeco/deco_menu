@@ -2,10 +2,12 @@
     <?= $block->getListTypeCategoryCollection() ?>
 </div>
 
-<script type="text/javascript">
+<?php $scriptString = <<<script
     require([
         'deco_menu_mobile'
     ], function (decoMenuMobile) {
         decoMenuMobile.mobile();
     });
-</script>
+script;
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptString, false) ?>
